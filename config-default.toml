@@ -3,6 +3,7 @@
 
 bind = "0.0.0.0:28019"
 api = false
+bangs = true
 
 [ui]
 # engine_list_separator = true

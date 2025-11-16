@@ -1,7 +1,7 @@
 mod all;
 mod images;
 
-use std::{collections::HashMap, net::SocketAddr, str::FromStr};
+use std::{collections::HashMap, net::SocketAddr, str::FromStr, sync::LazyLock};
 
 use async_stream::stream;
 use axum::{
@@ -22,6 +22,11 @@ use crate::{
     },
     web::head_html,
 };
+
+// to update: `curl -sSL "https://duckduckgo.com/bang.js" | jq "map({key: .t, value: .u}) | from_entries | tostring" -r > bangs.json`
+static BANGS: LazyLock<HashMap<String, String>> = LazyLock::new(|| {
+    serde_json::from_str(include_str!("assets/bangs.json")).expect("Failed to parse bangs.json")
+});
 
 fn render_beginning_of_html(search: &SearchQuery) -> String {
     let form_html = html! {
@@ -139,6 +144,36 @@ pub async fn get(
             Body::from("<a href=\"/\">No query provided, click here to go back to index</a>"),
         )
             .into_response();
+    }
+
+    if config.bangs {
+        if let Some(caps) = regex::Regex::new("(^!(\\w+)$|^!(\\w+)\\s+|\\s+!(\\w+)$)")
+            .unwrap()
+            .captures(&query)
+        {
+            let bang = caps.get(2).or(caps.get(3).or(caps.get(4)));
+            if let Some(bang) = bang {
+                let bang = bang.as_str();
+                if let Some(url) = BANGS.get(bang) {
+                    let location = url.replace(
+                        "{{{s}}}",
+                        &urlencoding::encode(query.replace(&format!("!{bang}"), "").trim()),
+                    );
+
+                    return (
+                        StatusCode::PERMANENT_REDIRECT,
+                        [
+                            (header::LOCATION, &location),
+                            (header::CONTENT_TYPE, &"text/html; charset=utf-8".to_owned()),
+                        ],
+                        Body::from(format!(
+                            "<a href=\"{location}\">Click here to follow bang</a>"
+                        )),
+                    )
+                        .into_response();
+                }
+            }
+        }
     }
 
     let search_tab = params

@@ -16,6 +16,7 @@ impl Default for Config {
         Config {
             bind: "0.0.0.0:28019".parse().unwrap(),
             api: false,
+            bangs: true,
             ui: UiConfig {
                 show_engine_list_separator: false,
                 show_version_info: false,
@@ -153,6 +154,8 @@ pub struct Config {
     pub bind: SocketAddr,
     /// Whether the JSON API should be accessible.
     pub api: bool,
+    /// Whether DuckDuckGo bang redirection is enabled.
+    pub bangs: bool,
     pub ui: UiConfig,
     pub image_search: ImageSearchConfig,
     // wrapped in an arc to make Config cheaper to clone
@@ -164,6 +167,7 @@ pub struct Config {
 pub struct PartialConfig {
     pub bind: Option<SocketAddr>,
     pub api: Option<bool>,
+    pub bangs: Option<bool>,
     pub ui: Option<PartialUiConfig>,
     pub image_search: Option<PartialImageSearchConfig>,
     pub engines: Option<PartialEnginesConfig>,
@@ -174,6 +178,7 @@ impl Config {
     pub fn overlay(&mut self, partial: PartialConfig) {
         self.bind = partial.bind.unwrap_or(self.bind);
         self.api = partial.api.unwrap_or(self.api);
+        self.bangs = partial.bangs.unwrap_or(self.bangs);
         self.ui.overlay(partial.ui.unwrap_or_default());
         self.image_search
             .overlay(partial.image_search.unwrap_or_default());
