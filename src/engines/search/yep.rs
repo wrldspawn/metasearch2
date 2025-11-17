@@ -56,6 +56,7 @@ pub fn parse_response(body: &str) -> eyre::Result<EngineResponse> {
                 description,
             }
         })
+        .filter(|result| result.description != "Run the same search on:")
         .collect();
 
     Ok(EngineResponse {
