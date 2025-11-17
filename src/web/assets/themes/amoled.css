@@ -1,0 +1,33 @@
+:root {
+  /* body background */
+  --bg-1: #000000;
+  /* background of the content */
+  --bg-2: #080808;
+  /* input suggestions background */
+  --bg-3: #040404;
+  /* mostly borders */
+  --bg-4: #202020;
+
+  /* main text color */
+  --fg-1: #f1f3f4;
+  /* search result description */
+  --fg-2: #f1f3f4;
+  --fg-3: #babcbe;
+
+  /* focus outline */
+  --accent: #bd93f9;
+
+  --link: #8ab4f8;
+  --link-visited: #bd93f9;
+
+  /* green */
+  --positive: #70b04a;
+  /* red, error */
+  --negative: #eb4b4b;
+
+  --syntax-string: #70b04a;
+  --syntax-special: #5e98d9;
+  --syntax-constant: #d9d9d9;
+  --syntax-comment: #837e77;
+  --syntax-func: #8650ac;
+}

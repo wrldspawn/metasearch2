@@ -221,16 +221,16 @@ a.search-tab {
 }
 .search-result-url {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--fg-3);
 }
 .search-result-title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 .search-result-description {
   margin: 0;
-  font-size: 0.8em;
+  font-size: 1em;
   color: var(--fg-2);
 }
 
@@ -240,7 +240,7 @@ a.search-tab {
   justify-content: end;
   display: flex;
   gap: 0.5em;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 /* featured snippet */
@@ -556,7 +556,7 @@ h3.answer-thesaurus-category-title {
   overflow: hidden;
   text-overflow: ellipsis;
 
-  font-size: 0.8rem;
+  font-size: 1rem;
 
   white-space: nowrap;
   width: 100%;
@@ -567,7 +567,7 @@ h3.answer-thesaurus-category-title {
   overflow: hidden;
   text-overflow: ellipsis;
 
-  font-size: 0.85rem;
+  font-size: 1.2rem;
 
   white-space: nowrap;
   width: 100%;

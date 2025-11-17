@@ -78,7 +78,10 @@ pub async fn run(config: Config) {
         "themes/catppuccin-macchiato.css",
         "themes/catppuccin-latte.css",
         "themes/nord-bluish.css",
-        "themes/discord.css"
+        "themes/discord.css",
+        "themes/source-tools.css",
+        "themes/goldsrc.css",
+        "themes/amoled.css"
     ];
 
     info!("Listening on http://{bind_addr}");
