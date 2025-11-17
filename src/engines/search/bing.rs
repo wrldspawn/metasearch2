@@ -3,20 +3,22 @@ use eyre::eyre;
 use scraper::{ElementRef, Html, Selector};
 use tracing::warn;
 use url::Url;
+use wreq::RequestBuilder;
 
 use crate::{
     engines::{EngineImageResult, EngineImagesResponse, EngineResponse, CLIENT},
     parse::{parse_html_response_with_opts, ParseOpts, QueryMethod},
 };
 
-pub fn request(query: &str) -> reqwest::RequestBuilder {
+pub fn request(query: &str) -> RequestBuilder {
     CLIENT.get(
         Url::parse_with_params(
             "https://www.bing.com/search",
             // filters=rcrse:"1" makes it not try to autocorrect
             &[("q", query), ("filters", "rcrse:\"1\"")],
         )
-        .unwrap(),
+        .unwrap()
+        .as_str(),
     )
 }
 
@@ -66,7 +68,7 @@ pub fn parse_response(body: &str) -> eyre::Result<EngineResponse> {
     )
 }
 
-pub fn request_images(query: &str) -> reqwest::RequestBuilder {
+pub fn request_images(query: &str) -> RequestBuilder {
     CLIENT.get(
         Url::parse_with_params(
             "https://www.bing.com/images/async",
@@ -77,7 +79,8 @@ pub fn request_images(query: &str) -> reqwest::RequestBuilder {
                 ("count", "35"),
             ],
         )
-        .unwrap(),
+        .unwrap()
+        .as_str(),
     )
 }
 

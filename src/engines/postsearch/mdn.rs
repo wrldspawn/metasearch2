@@ -2,6 +2,7 @@ use maud::{html, PreEscaped};
 use scraper::{Html, Selector};
 use serde::Deserialize;
 use tracing::error;
+use url::Url;
 
 use crate::engines::{Engine, HttpResponse, Response, CLIENT};
 
@@ -10,7 +11,7 @@ pub struct MdnConfig {
     pub max_sections: usize,
 }
 
-pub fn request(response: &Response) -> Option<reqwest::RequestBuilder> {
+pub fn request(response: &Response) -> Option<wreq::RequestBuilder> {
     for search_result in response.search_results.iter().take(8) {
         if search_result
             .result
@@ -36,7 +37,7 @@ pub fn parse_response(
         }
     };
 
-    let url = res.url().clone();
+    let url = res.uri().clone();
 
     let dom = Html::parse_document(body);
 
@@ -65,7 +66,9 @@ pub fn parse_response(
 
     let doc_html = ammonia::Builder::default()
         .link_rel(None)
-        .url_relative(ammonia::UrlRelative::RewriteWithBase(url.clone()))
+        .url_relative(ammonia::UrlRelative::RewriteWithBase(
+            Url::parse(&url.clone().to_string()).unwrap(),
+        ))
         .clean(&doc_html)
         .to_string();
 

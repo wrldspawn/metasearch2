@@ -1,4 +1,4 @@
-use reqwest::Url;
+use url::Url;
 
 use crate::{
     engines::{EngineResponse, RequestResponse, CLIENT},
@@ -19,7 +19,8 @@ pub fn request(query: &str) -> RequestResponse {
                     ("optic", ""),
                 ],
             )
-            .unwrap(),
+            .unwrap()
+            .as_str(),
         )
         .into()
 }

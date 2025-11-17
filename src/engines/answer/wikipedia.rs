@@ -38,7 +38,8 @@ pub fn request(mut query: &str) -> RequestResponse {
                     ("titles", query),
                 ],
             )
-            .unwrap(),
+            .unwrap()
+            .as_str(),
         )
         .into()
 }

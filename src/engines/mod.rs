@@ -11,7 +11,7 @@ use std::{
 use eyre::bail;
 use futures::future::join_all;
 use maud::PreEscaped;
-use reqwest::{header::HeaderMap, RequestBuilder};
+//use reqwest::{header::HeaderMap, RequestBuilder};
 use serde::{Deserialize, Deserializer, Serialize};
 use tokio::sync::mpsc;
 use tracing::{error, info};
@@ -161,11 +161,11 @@ impl Display for SearchTab {
 
 pub enum RequestResponse {
     None,
-    Http(reqwest::RequestBuilder),
+    Http(wreq::RequestBuilder),
     Instant(EngineResponse),
 }
-impl From<reqwest::RequestBuilder> for RequestResponse {
-    fn from(req: reqwest::RequestBuilder) -> Self {
+impl From<wreq::RequestBuilder> for RequestResponse {
+    fn from(req: wreq::RequestBuilder) -> Self {
         Self::Http(req)
     }
 }
@@ -176,11 +176,11 @@ impl From<EngineResponse> for RequestResponse {
 }
 
 pub enum RequestAutocompleteResponse {
-    Http(Box<reqwest::RequestBuilder>),
+    Http(Box<wreq::RequestBuilder>),
     Instant(Vec<String>),
 }
-impl From<reqwest::RequestBuilder> for RequestAutocompleteResponse {
-    fn from(req: reqwest::RequestBuilder) -> Self {
+impl From<wreq::RequestBuilder> for RequestAutocompleteResponse {
+    fn from(req: wreq::RequestBuilder) -> Self {
         Self::Http(Box::new(req))
     }
 }
@@ -191,7 +191,7 @@ impl From<Vec<String>> for RequestAutocompleteResponse {
 }
 
 pub struct HttpResponse {
-    pub res: reqwest::Response,
+    pub res: wreq::Response,
     pub body: String,
     pub config: Arc<Config>,
 }
@@ -202,7 +202,7 @@ impl<'a> From<&'a HttpResponse> for &'a str {
     }
 }
 
-impl From<HttpResponse> for reqwest::Response {
+impl From<HttpResponse> for wreq::Response {
     fn from(res: HttpResponse) -> Self {
         res.res
     }
@@ -310,7 +310,7 @@ impl ProgressUpdate {
 }
 
 async fn make_request(
-    request: RequestBuilder,
+    request: wreq::RequestBuilder,
     engine: Engine,
     query: &SearchQuery,
     send_engine_progress_update: impl Fn(Engine, EngineProgressUpdate),
@@ -614,31 +614,39 @@ pub async fn autocomplete(config: &Config, query: &str) -> eyre::Result<Vec<Stri
     ))
 }
 
-pub static CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| {
-    reqwest::ClientBuilder::new()
+pub static CLIENT: LazyLock<wreq::Client> = LazyLock::new(|| {
+    wreq::Client::builder()
         .local_address(IpAddr::from_str("0.0.0.0").unwrap())
         // we pretend to be a normal browser so websites don't block us
         // (since we're not entirely a bot, we're acting on behalf of the user)
-        .user_agent({
+        /*.user_agent({
             let now = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
                 .as_secs();
             // magic autoupdating firefox version math (until mozilla changes versioning and schedule)
-            let version = std::primitive::f64::floor((128 + (now - 1710892800) / 2419200) as f64);
+            // this is off by 4 somehow???
+            let version = std::primitive::f64::floor((124 + (now - 1710892800) / 2419200) as f64);
             format!("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{version}.0) Gecko/20100101 Firefox/{version}.0")
         })
         .default_headers({
             let mut headers = HeaderMap::new();
+            headers.insert("Accept", "* / *".parse().unwrap());
+            headers.insert("Accept-Encoding", "gzip, deflate, br, zstd".parse().unwrap());
             headers.insert("Accept-Language", "en-US,en;q=0.5".parse().unwrap());
-            headers.insert(
-                "Accept",
-                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-                    .parse()
-                    .unwrap(),
-            );
+            headers.insert("Connection", "keep-alive".parse().unwrap());
+            headers.insert("Sec-Fetch-Dest", "document".parse().unwrap());
+            headers.insert("Sec-Fetch-Mode", "navigate".parse().unwrap());
+            headers.insert("Sec-Fetch-Site", "none".parse().unwrap());
+            headers.insert("Sec-GPC", "1".parse().unwrap());
+            headers.insert("TE", "trailers".parse().unwrap());
             headers
         })
+        .gzip(true)
+        .deflate(true)
+        .brotli(true)
+        .zstd(true)*/
+        .emulation(wreq_util::Emulation::Firefox143)
         .timeout(Duration::from_secs(10))
         .build()
         .unwrap()

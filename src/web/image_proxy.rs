@@ -6,8 +6,8 @@ use axum::{
     response::{IntoResponse, Response},
     Extension,
 };
-use reqwest::header;
 use tracing::error;
+use wreq::header;
 
 use crate::{config::Config, engines};
 
@@ -49,7 +49,7 @@ pub async fn route(
     // validate content-type
     let content_type = res
         .headers()
-        .get(reqwest::header::CONTENT_TYPE)
+        .get(wreq::header::CONTENT_TYPE)
         .and_then(|v| v.to_str().ok())
         .unwrap_or_default()
         .to_string();

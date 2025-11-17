@@ -9,13 +9,14 @@ use rand::distr::{slice::Choose, SampleString};
 use scraper::{ElementRef, Selector};
 use tracing::warn;
 use url::Url;
+use wreq::RequestBuilder;
 
 use crate::{
     engines::{EngineImageResult, EngineImagesResponse, EngineResponse, CLIENT},
     parse::{parse_html_response_with_opts, ParseOpts, QueryMethod},
 };
 
-pub fn request(query: &str) -> reqwest::RequestBuilder {
+pub fn request(query: &str) -> RequestBuilder {
     let url = Url::parse_with_params(
         "https://www.google.com/search",
         &[
@@ -31,7 +32,7 @@ pub fn request(query: &str) -> reqwest::RequestBuilder {
         ],
     )
     .unwrap();
-    CLIENT.get(url)
+    CLIENT.get(url.as_str())
 }
 
 fn generate_async_value() -> String {
@@ -151,7 +152,7 @@ fn recursive_iter_featured_snippet_children(description: &mut String, el: &Eleme
     }
 }
 
-pub fn request_autocomplete(query: &str) -> reqwest::RequestBuilder {
+pub fn request_autocomplete(query: &str) -> RequestBuilder {
     CLIENT.get(
         Url::parse_with_params(
             "https://suggestqueries.google.com/complete/search",
@@ -162,7 +163,8 @@ pub fn request_autocomplete(query: &str) -> reqwest::RequestBuilder {
                 ("q", query),
             ],
         )
-        .unwrap(),
+        .unwrap()
+        .as_str(),
     )
 }
 
@@ -180,14 +182,15 @@ pub fn parse_autocomplete_response(body: &str) -> eyre::Result<Vec<String>> {
         .collect())
 }
 
-pub fn request_images(query: &str) -> reqwest::RequestBuilder {
+pub fn request_images(query: &str) -> RequestBuilder {
     // ok so google also has a json api for images BUT it gives us less results
     CLIENT.get(
         Url::parse_with_params(
             "https://www.google.com/search",
             &[("q", query), ("udm", "2"), ("prmd", "ivsnmbtz")],
         )
-        .unwrap(),
+        .unwrap()
+        .as_str(),
     )
 }
 

@@ -1,6 +1,6 @@
-use reqwest::Url;
 use serde::Deserialize;
 use tracing::error;
+use url::Url;
 
 use crate::{
     engines::{Engine, EngineResponse, RequestResponse, SearchQuery, CLIENT},
@@ -46,7 +46,8 @@ pub fn request(query: &SearchQuery) -> RequestResponse {
                     ("adtech", config.args.adtech.as_str()),
                 ],
             )
-            .unwrap(),
+            .unwrap()
+            .as_str(),
         )
         .into()
 }

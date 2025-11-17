@@ -1,9 +1,10 @@
 use maud::{html, PreEscaped};
 use scraper::{Html, Selector};
+use url::Url;
 
 use crate::engines::{HttpResponse, Response, CLIENT};
 
-pub fn request(response: &Response) -> Option<reqwest::RequestBuilder> {
+pub fn request(response: &Response) -> Option<wreq::RequestBuilder> {
     for search_result in response.search_results.iter().take(8) {
         if search_result
             .result
@@ -18,7 +19,7 @@ pub fn request(response: &Response) -> Option<reqwest::RequestBuilder> {
 }
 
 pub fn parse_response(HttpResponse { res, body, .. }: &HttpResponse) -> Option<PreEscaped<String>> {
-    let url = res.url().clone();
+    let url = res.uri().clone();
 
     let dom = Html::parse_document(body);
 
@@ -42,7 +43,9 @@ pub fn parse_response(HttpResponse { res, body, .. }: &HttpResponse) -> Option<P
         .link_rel(None)
         .add_allowed_classes("div", ["notaninfobox", "mcw-mainpage-icon"])
         .add_allowed_classes("pre", ["noexcerpt", "navigation-not-searchable"])
-        .url_relative(ammonia::UrlRelative::RewriteWithBase(url.clone()))
+        .url_relative(ammonia::UrlRelative::RewriteWithBase(
+            Url::parse(&url.clone().to_string()).unwrap(),
+        ))
         .clean(&doc_html)
         .to_string();
 

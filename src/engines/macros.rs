@@ -105,7 +105,7 @@ macro_rules! engine_postsearch_requests {
     ($($engine:ident => $module:ident::$engine_id:ident::$request:ident, $parse_response:ident),* $(,)?) => {
         impl Engine {
             #[must_use]
-            pub fn postsearch_request(&self, response: &Response) -> Option<reqwest::RequestBuilder> {
+            pub fn postsearch_request(&self, response: &Response) -> Option<wreq::RequestBuilder> {
                 match self {
                     $(
                         Engine::$engine => $module::$engine_id::$request(response),

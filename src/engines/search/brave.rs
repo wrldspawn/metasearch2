@@ -13,7 +13,11 @@ pub fn request(query: &str) -> RequestResponse {
     }
 
     CLIENT
-        .get(Url::parse_with_params("https://search.brave.com/search", &[("q", query)]).unwrap())
+        .get(
+            Url::parse_with_params("https://search.brave.com/search", &[("q", query)])
+                .unwrap()
+                .as_str(),
+        )
         .into()
 }
 

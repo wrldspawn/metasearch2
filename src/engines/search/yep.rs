@@ -1,5 +1,5 @@
-use reqwest::Url;
 use serde::Deserialize;
+use url::Url;
 
 use crate::engines::{EngineResponse, EngineSearchResult, RequestResponse, CLIENT};
 
@@ -17,8 +17,12 @@ pub fn request(query: &str) -> RequestResponse {
                     ("type", "web"),
                 ],
             )
-            .unwrap(),
+            .unwrap()
+            .as_str(),
         )
+        .header("Host", "api.yep.com")
+        .header("Origin", "https://yep.com")
+        .header("Referer", "https://yep.com/")
         .into()
 }
 

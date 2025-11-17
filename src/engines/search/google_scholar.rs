@@ -1,4 +1,4 @@
-use reqwest::Url;
+use url::Url;
 
 use crate::{
     engines::{EngineResponse, RequestResponse, CLIENT},
@@ -12,7 +12,8 @@ pub fn request(query: &str) -> RequestResponse {
                 "https://scholar.google.com/scholar",
                 &[("hl", "en"), ("as_sdt", "0,5"), ("q", query), ("btnG", "")],
             )
-            .unwrap(),
+            .unwrap()
+            .as_str(),
         )
         .into()
 }

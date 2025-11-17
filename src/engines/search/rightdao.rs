@@ -1,4 +1,4 @@
-use reqwest::Url;
+use url::Url;
 
 use crate::{
     engines::{EngineResponse, RequestResponse, CLIENT},
@@ -7,7 +7,11 @@ use crate::{
 
 pub fn request(query: &str) -> RequestResponse {
     CLIENT
-        .get(Url::parse_with_params("https://rightdao.com/search", &[("q", query)]).unwrap())
+        .get(
+            Url::parse_with_params("https://rightdao.com/search", &[("q", query)])
+                .unwrap()
+                .as_str(),
+        )
         .into()
 }
 

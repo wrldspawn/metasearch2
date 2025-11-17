@@ -8,7 +8,16 @@ use crate::{
 
 pub fn request(query: &str) -> RequestResponse {
     CLIENT
-        .get(Url::parse_with_params("https://html.duckduckgo.com/html/", &[("q", query)]).unwrap())
+        .get(
+            Url::parse_with_params(
+                "https://html.duckduckgo.com/html/",
+                &[("q", query), ("kl", "wt-wt"), ("kp", "-1")],
+            )
+            .unwrap()
+            .as_str(),
+        )
+        .header("Host", "html.duckduckgo.com")
+        .header("Alt-Used", "html.duckduckgo.com")
         .into()
 }
 
