@@ -5,7 +5,7 @@ use std::{
     ops::Deref,
     str::FromStr,
     sync::{Arc, LazyLock},
-    time::{Duration, Instant},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use eyre::bail;
@@ -619,10 +619,24 @@ pub static CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| {
         .local_address(IpAddr::from_str("0.0.0.0").unwrap())
         // we pretend to be a normal browser so websites don't block us
         // (since we're not entirely a bot, we're acting on behalf of the user)
-        .user_agent("Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0")
+        .user_agent({
+            let now = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs();
+            // magic autoupdating firefox version math (until mozilla changes versioning and schedule)
+            let version = std::primitive::f64::floor((128 + (now - 1710892800) / 2419200) as f64);
+            format!("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{version}.0) Gecko/20100101 Firefox/{version}.0")
+        })
         .default_headers({
             let mut headers = HeaderMap::new();
             headers.insert("Accept-Language", "en-US,en;q=0.5".parse().unwrap());
+            headers.insert(
+                "Accept",
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+                    .parse()
+                    .unwrap(),
+            );
             headers
         })
         .timeout(Duration::from_secs(10))

@@ -38,7 +38,7 @@ fn generate_async_value() -> String {
     // https://github.com/searxng/searxng/blob/08a90d46d6f23607ddecf2a2d9fa216df69d2fac/searx/engines/google.py#L80
 
     let use_ac = "use_ac:true";
-    let fmt = "_fmt:prog";
+    let fmt = "_fmt:html";
 
     static CURRENT_RANDOM_CHARACTERS: LazyLock<Arc<RwLock<(String, Instant)>>> =
         LazyLock::new(|| Arc::new(RwLock::new((generate_new_arc_id_random(), Instant::now()))));
@@ -76,10 +76,8 @@ pub fn parse_response(body: &str) -> eyre::Result<EngineResponse> {
             // span
             .result("[jscontroller=SC7lYd]")
             .title("h3")
-            .href("a[href]")
-            .description(
-                "div[data-sncf='2'], div[data-sncf='1,2'], div[style='-webkit-line-clamp:2']",
-            )
+            .href("a[jsname=UWckNb]")
+            .description("div[data-sncf=1]")
             .featured_snippet("block-component")
             .featured_snippet_description(QueryMethod::Manual(Box::new(|el: &ElementRef| {
                 let mut description = String::new();
