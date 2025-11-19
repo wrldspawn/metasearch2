@@ -12,9 +12,9 @@ use crate::{
 };
 
 pub fn request(query: &str) -> RequestBuilder {
-    let mut bytes = [0u8; 16];
-    rand::rng().fill_bytes(&mut bytes);
-    let rdrig = hex::encode(&bytes);
+    //let mut bytes = [0u8; 16];
+    //rand::rng().fill_bytes(&mut bytes);
+    //let rdrig = hex::encode(&bytes);
 
     CLIENT.get(
         Url::parse_with_params(
@@ -22,9 +22,12 @@ pub fn request(query: &str) -> RequestBuilder {
             // filters=rcrse:"1" makes it not try to autocorrect
             &[
                 ("q", query),
-                ("filters", "rcrse:\"1\""),
-                ("rdr", "1"),
-                ("rdrig", &rdrig),
+                ("form", "QBRE"),
+                ("ghc", "1"),
+                ("lq", "0"),
+                //("filters", "rcrse:\"1\""),
+                //("rdr", "1"),
+                //("rdrig", &rdrig),
             ],
         )
         .unwrap()
