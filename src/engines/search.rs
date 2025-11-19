@@ -4,6 +4,7 @@ pub mod duckduckgo;
 pub mod google;
 pub mod google_scholar;
 pub mod marginalia;
+pub mod qwant;
 pub mod rightdao;
 pub mod stract;
 pub mod yep;
