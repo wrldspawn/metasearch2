@@ -5,6 +5,7 @@ pub mod ghostery;
 pub mod google;
 pub mod google_scholar;
 pub mod marginalia;
+pub mod mojeek;
 pub mod qwant;
 pub mod rightdao;
 pub mod stract;
