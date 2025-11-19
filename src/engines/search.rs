@@ -1,5 +1,6 @@
 pub mod bing;
 pub mod brave;
+pub mod dogpile;
 pub mod duckduckgo;
 pub mod ecosia;
 pub mod ghostery;

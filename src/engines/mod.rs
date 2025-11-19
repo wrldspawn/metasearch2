@@ -33,6 +33,7 @@ engines! {
     GoogleScholar = "google_scholar",
     Bing = "bing",
     Brave = "brave",
+    Dogpile = "dogpile",
     DuckDuckGo = "duckduckgo",
     Ecosia = "ecosia",
     Ghostery = "ghostery",
@@ -65,6 +66,7 @@ engine_requests! {
     // search
     Bing => search::bing::request, parse_response,
     Brave => search::brave::request, parse_response,
+    Dogpile => search::dogpile::request, parse_response,
     DuckDuckGo => search::duckduckgo::request, parse_response,
     Ecosia => search::ecosia::request, parse_response,
     GoogleScholar => search::google_scholar::request, parse_response,
