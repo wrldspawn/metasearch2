@@ -1,5 +1,6 @@
 use base64::Engine;
 use eyre::eyre;
+use rand::RngCore;
 use scraper::{ElementRef, Html, Selector};
 use tracing::warn;
 use url::Url;
@@ -11,11 +12,20 @@ use crate::{
 };
 
 pub fn request(query: &str) -> RequestBuilder {
+    let mut bytes = [0u8; 16];
+    rand::rng().fill_bytes(&mut bytes);
+    let rdrig = hex::encode(&bytes);
+
     CLIENT.get(
         Url::parse_with_params(
             "https://www.bing.com/search",
             // filters=rcrse:"1" makes it not try to autocorrect
-            &[("q", query), ("filters", "rcrse:\"1\"")],
+            &[
+                ("q", query),
+                ("filters", "rcrse:\"1\""),
+                ("rdr", "1"),
+                ("rdrig", &rdrig),
+            ],
         )
         .unwrap()
         .as_str(),
