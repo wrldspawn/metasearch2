@@ -1,6 +1,7 @@
 pub mod bing;
 pub mod brave;
 pub mod duckduckgo;
+pub mod ghostery;
 pub mod google;
 pub mod google_scholar;
 pub mod marginalia;
