@@ -37,28 +37,17 @@ pub fn parse_response(body: &str) -> eyre::Result<EngineResponse> {
     let mut results: Vec<QwantSearchItem> = Vec::new();
     match serde_json::from_str::<serde_json::Value>(body) {
         Ok(json_val) => {
-            if let Some(data) = json_val.get("data") {
-                if let Some(result) = data.get("result") {
-                    if let Some(items) = result.get("items") {
-                        if let Some(mainline) = items.get("mainline").and_then(|o| o.as_array()) {
-                            for group in mainline {
-                                if let Some(t) = group.get("type").and_then(|o| o.as_str()) {
-                                    if t == "web" {
-                                        if let Some(items) =
-                                            group.get("items").and_then(|o| o.as_array())
-                                        {
-                                            for i in items {
-                                                let item: QwantSearchItem =
-                                                    serde_json::from_value(i.clone()).unwrap();
-                                                results.push(item);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            if let Some(mainline) = json_val
+                .pointer("/data/result/items/mainline")
+                .and_then(|o| o.as_array())
+            {
+                results.extend(
+                    mainline
+                        .iter()
+                        .filter(|o| o["type"] == "web")
+                        .flat_map(|o| o["items"].as_array().into_iter().flatten())
+                        .map(|item| serde_json::from_value(item.clone()).unwrap()),
+                );
             }
         }
         Err(_) => {
