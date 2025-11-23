@@ -3,7 +3,7 @@ use url::Url;
 
 use crate::engines::{EngineResponse, EngineSearchResult, RequestResponse, CLIENT};
 
-pub fn request(query: &str) -> RequestResponse {
+pub async fn request(query: &str) -> RequestResponse {
     CLIENT
         .get(
             Url::parse_with_params(

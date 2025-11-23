@@ -87,7 +87,7 @@ pub fn render_infobox(infobox: &Infobox, config: &Config) -> PreEscaped<String> 
     html! {
         div.infobox.postsearch-infobox {
             (infobox.html)
-            (render_engine_list(&[infobox.engine], &config))
+            (render_engine_list(&[infobox.engine], config))
         }
     }
 }

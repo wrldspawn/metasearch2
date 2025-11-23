@@ -18,7 +18,7 @@ pub struct MarginaliaArgs {
     pub adtech: String,
 }
 
-pub fn request(query: &SearchQuery) -> RequestResponse {
+pub async fn request(query: &SearchQuery) -> RequestResponse {
     // if the query is more than 3 words or has any special characters then abort
     if query.split_whitespace().count() > 3
         || !query.chars().all(|c| c.is_ascii_alphanumeric() || c == ' ')

@@ -4,14 +4,13 @@ use rand::RngCore;
 use scraper::{ElementRef, Html, Selector};
 use tracing::warn;
 use url::Url;
-use wreq::RequestBuilder;
 
 use crate::{
     engines::{EngineImageResult, EngineImagesResponse, EngineResponse, CLIENT},
     parse::{parse_html_response_with_opts, ParseOpts, QueryMethod},
 };
 
-pub fn request(query: &str) -> RequestBuilder {
+pub async fn request(query: &str) -> wreq::RequestBuilder {
     //let mut bytes = [0u8; 16];
     //rand::rng().fill_bytes(&mut bytes);
     //let rdrig = hex::encode(&bytes);
@@ -81,7 +80,7 @@ pub fn parse_response(body: &str) -> eyre::Result<EngineResponse> {
     )
 }
 
-pub fn request_images(query: &str) -> RequestBuilder {
+pub fn request_images(query: &str) -> wreq::RequestBuilder {
     CLIENT.get(
         Url::parse_with_params(
             "https://www.bing.com/images/async",

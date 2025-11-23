@@ -417,7 +417,7 @@ impl UrlsConfig {
             self.weight.push((url, weight));
         }
 
-        // sort by length so that more specific checls are done first
+        // sort by length so that more specific checks are done first
         self.weight.sort_by(|(a, _), (b, _)| {
             let a_len = a.path.len() + a.host.len();
             let b_len = b.path.len() + b.host.len();

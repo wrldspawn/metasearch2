@@ -4,7 +4,7 @@ use url::Url;
 
 use crate::engines::{HttpResponse, Response, CLIENT};
 
-pub fn request(response: &Response) -> Option<wreq::RequestBuilder> {
+pub async fn request(response: &Response) -> Option<wreq::RequestBuilder> {
     for search_result in response.search_results.iter().take(8) {
         if search_result
             .result

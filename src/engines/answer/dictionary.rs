@@ -9,7 +9,7 @@ use crate::engines::{EngineResponse, HttpResponse, RequestResponse, CLIENT};
 
 use super::regex;
 
-pub fn request(query: &str) -> RequestResponse {
+pub async fn request(query: &str) -> RequestResponse {
     // if the query starts with "define " then use that, otherwise abort
     let re = regex!(r"^define\s+(\w+)$");
     let query = match re.captures(query) {

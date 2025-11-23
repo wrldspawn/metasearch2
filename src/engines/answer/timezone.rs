@@ -6,7 +6,7 @@ use crate::engines::EngineResponse;
 
 use super::regex;
 
-pub fn request(query: &str) -> EngineResponse {
+pub async fn request(query: &str) -> EngineResponse {
     match evaluate(query) {
         None => EngineResponse::new(),
         Some(TimeResponse::Current { time, timezone }) => EngineResponse::answer_html(html! {

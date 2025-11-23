@@ -4,7 +4,7 @@ use crate::engines::{EngineResponse, SearchQuery};
 
 use super::regex;
 
-pub fn request(query: &SearchQuery) -> EngineResponse {
+pub async fn request(query: &SearchQuery) -> EngineResponse {
     if !regex!("^(note|text|code) ?(pad|book|edit(or|er)?)$").is_match(&query.query.to_lowercase())
     {
         return EngineResponse::new();

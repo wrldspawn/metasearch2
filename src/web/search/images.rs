@@ -41,7 +41,7 @@ fn render_image_result(
                 span.image-result-title { (result.result.title) }
             }
             @if config.image_search.show_engines {
-                {(render_engine_list(&result.engines.iter().copied().collect::<Vec<_>>(), &config))}
+                {(render_engine_list(&result.engines.iter().copied().collect::<Vec<_>>(), config))}
             }
         }
     }

@@ -1,71 +1,30 @@
-use std::{
-    sync::{Arc, LazyLock},
-    time::Instant,
-};
-
 use eyre::eyre;
-use parking_lot::RwLock;
-use rand::distr::{slice::Choose, SampleString};
 use scraper::{ElementRef, Selector};
 use tracing::warn;
 use url::Url;
-use wreq::RequestBuilder;
 
 use crate::{
-    engines::{EngineImageResult, EngineImagesResponse, EngineResponse, CLIENT},
+    engines::{
+        EngineImageResult, EngineImagesResponse, EngineResponse, RequestResponse, SearchQuery,
+        CLIENT,
+    },
     parse::{parse_html_response_with_opts, ParseOpts, QueryMethod},
 };
 
-pub fn request(query: &str) -> RequestBuilder {
+pub async fn request(search: &SearchQuery) -> eyre::Result<RequestResponse> {
     let url = Url::parse_with_params(
         "https://www.google.com/search",
         &[
-            ("q", query),
+            ("q", search.query.as_str()),
             // nfpr makes it not try to autocorrect
             ("nfpr", "1"),
             ("filter", "0"),
             ("start", "0"),
-            // mobile search, lets us easily search without js
-            ("asearch", "arc"),
-            // required for mobile search to work
-            ("async", &generate_async_value()),
         ],
     )
     .unwrap();
-    CLIENT.get(url.as_str())
-}
 
-fn generate_async_value() -> String {
-    // https://github.com/searxng/searxng/blob/08a90d46d6f23607ddecf2a2d9fa216df69d2fac/searx/engines/google.py#L80
-
-    let use_ac = "use_ac:true";
-    let fmt = "_fmt:html";
-
-    static CURRENT_RANDOM_CHARACTERS: LazyLock<Arc<RwLock<(String, Instant)>>> =
-        LazyLock::new(|| Arc::new(RwLock::new((generate_new_arc_id_random(), Instant::now()))));
-    let (random_characters, last_set) = CURRENT_RANDOM_CHARACTERS.read().clone();
-
-    if last_set.elapsed().as_secs() > 60 * 60 {
-        // copy what searxng does and rotate every hour
-        let mut arc_id = CURRENT_RANDOM_CHARACTERS.write();
-        *arc_id = (generate_new_arc_id_random(), Instant::now());
-    }
-
-    let page_number = 1;
-    let arc_id = format!(
-        "arc_id:srp_{random_characters}_{skip}",
-        skip = 100 + page_number * 10
-    );
-
-    format!("{arc_id},{use_ac},{fmt}")
-}
-
-fn generate_new_arc_id_random() -> String {
-    let candidate_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
-
-    Choose::new(&candidate_characters.chars().collect::<Vec<_>>())
-        .unwrap()
-        .sample_string(&mut rand::rng(), 23)
+    Ok(CLIENT.get(url.as_str()).into())
 }
 
 pub fn parse_response(body: &str) -> eyre::Result<EngineResponse> {
@@ -152,7 +111,7 @@ fn recursive_iter_featured_snippet_children(description: &mut String, el: &Eleme
     }
 }
 
-pub fn request_autocomplete(query: &str) -> RequestBuilder {
+pub fn request_autocomplete(query: &str) -> wreq::RequestBuilder {
     CLIENT.get(
         Url::parse_with_params(
             "https://suggestqueries.google.com/complete/search",
@@ -182,7 +141,7 @@ pub fn parse_autocomplete_response(body: &str) -> eyre::Result<Vec<String>> {
         .collect())
 }
 
-pub fn request_images(query: &str) -> RequestBuilder {
+pub fn request_images(query: &str) -> wreq::RequestBuilder {
     // ok so google also has a json api for images BUT it gives us less results
     CLIENT.get(
         Url::parse_with_params(

@@ -11,10 +11,10 @@ use std::{
 use eyre::bail;
 use futures::future::join_all;
 use maud::PreEscaped;
-//use reqwest::{header::HeaderMap, RequestBuilder};
 use serde::{Deserialize, Deserializer, Serialize};
 use tokio::sync::mpsc;
 use tracing::{error, info};
+use wreq_util::Emulation;
 
 mod macros;
 mod ranking;
@@ -171,17 +171,37 @@ impl Display for SearchTab {
 
 pub enum RequestResponse {
     None,
-    Http(wreq::RequestBuilder),
-    Instant(EngineResponse),
+    Http(Box<wreq::RequestBuilder>),
+    Instant(Box<EngineResponse>),
 }
 impl From<wreq::RequestBuilder> for RequestResponse {
     fn from(req: wreq::RequestBuilder) -> Self {
-        Self::Http(req)
+        Self::Http(Box::new(req))
     }
 }
-impl From<EngineResponse> for RequestResponse {
-    fn from(res: EngineResponse) -> Self {
-        Self::Instant(res)
+
+trait IntoRequestResponseResult {
+    fn into_request_response_result(self) -> eyre::Result<RequestResponse>;
+}
+
+impl IntoRequestResponseResult for wreq::RequestBuilder {
+    fn into_request_response_result(self) -> eyre::Result<RequestResponse> {
+        Ok(RequestResponse::Http(Box::new(self)))
+    }
+}
+impl IntoRequestResponseResult for EngineResponse {
+    fn into_request_response_result(self) -> eyre::Result<RequestResponse> {
+        Ok(RequestResponse::Instant(Box::new(self)))
+    }
+}
+impl IntoRequestResponseResult for RequestResponse {
+    fn into_request_response_result(self) -> eyre::Result<RequestResponse> {
+        Ok(self)
+    }
+}
+impl IntoRequestResponseResult for eyre::Result<RequestResponse> {
+    fn into_request_response_result(self) -> eyre::Result<RequestResponse> {
+        self
     }
 }
 
@@ -361,12 +381,19 @@ async fn make_requests(
         }
 
         requests.push(async move {
-            let request_response = engine.request(query);
+            let request_response = match engine.request(query).await {
+                Ok(r) => r,
+                Err(e) => {
+                    error!("request error for {engine}: {e}");
+                    send_engine_progress_update(engine, EngineProgressUpdate::Error(e.to_string()));
+                    return Err(e);
+                }
+            };
 
             let response = match request_response {
                 RequestResponse::Http(request) => {
                     let http_response =
-                        match make_request(request, engine, query, send_engine_progress_update)
+                        match make_request(*request, engine, query, send_engine_progress_update)
                             .await
                         {
                             Ok(http_response) => http_response,
@@ -395,7 +422,7 @@ async fn make_requests(
 
                     response
                 }
-                RequestResponse::Instant(response) => response,
+                RequestResponse::Instant(response) => *response,
                 RequestResponse::None => EngineResponse::new(),
             };
 
@@ -433,7 +460,7 @@ async fn make_requests(
                 continue;
             }
 
-            if let Some(request) = engine.postsearch_request(&response) {
+            if let Some(request) = engine.postsearch_request(&response).await {
                 postsearch_requests.push(async move {
                     let response = match request.send().await {
                         Ok(mut res) => {
@@ -506,7 +533,7 @@ async fn make_image_requests(
             let response = match request_response {
                 RequestResponse::Http(request) => {
                     let http_response =
-                        make_request(request, engine, query, send_engine_progress_update).await?;
+                        make_request(*request, engine, query, send_engine_progress_update).await?;
 
                     let response = match engine.parse_images_response(&http_response) {
                         Ok(response) => response,
@@ -628,35 +655,7 @@ pub static CLIENT: LazyLock<wreq::Client> = LazyLock::new(|| {
     wreq::Client::builder()
         .local_address(IpAddr::from_str("0.0.0.0").unwrap())
         // we pretend to be a normal browser so websites don't block us
-        // (since we're not entirely a bot, we're acting on behalf of the user)
-        /*.user_agent({
-            let now = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs();
-            // magic autoupdating firefox version math (until mozilla changes versioning and schedule)
-            // this is off by 4 somehow???
-            let version = std::primitive::f64::floor((124 + (now - 1710892800) / 2419200) as f64);
-            format!("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:{version}.0) Gecko/20100101 Firefox/{version}.0")
-        })
-        .default_headers({
-            let mut headers = HeaderMap::new();
-            headers.insert("Accept", "* / *".parse().unwrap());
-            headers.insert("Accept-Encoding", "gzip, deflate, br, zstd".parse().unwrap());
-            headers.insert("Accept-Language", "en-US,en;q=0.5".parse().unwrap());
-            headers.insert("Connection", "keep-alive".parse().unwrap());
-            headers.insert("Sec-Fetch-Dest", "document".parse().unwrap());
-            headers.insert("Sec-Fetch-Mode", "navigate".parse().unwrap());
-            headers.insert("Sec-Fetch-Site", "none".parse().unwrap());
-            headers.insert("Sec-GPC", "1".parse().unwrap());
-            headers.insert("TE", "trailers".parse().unwrap());
-            headers
-        })
-        .gzip(true)
-        .deflate(true)
-        .brotli(true)
-        .zstd(true)*/
-        .emulation(wreq_util::Emulation::Firefox143)
+        .emulation(Emulation::Firefox143)
         .timeout(Duration::from_secs(10))
         .build()
         .unwrap()

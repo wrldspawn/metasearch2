@@ -9,7 +9,7 @@ use crate::engines::{EngineResponse, RequestResponse, CLIENT};
 
 use super::regex;
 
-pub fn request(query: &str) -> RequestResponse {
+pub async fn request(query: &str) -> RequestResponse {
     let re = regex!(r"^synonym(?:s?) for\s+(\w+)$");
     let re2 = regex!(r"^(\w+)\s+synonym(?:s?)$");
     let Some(query) = re

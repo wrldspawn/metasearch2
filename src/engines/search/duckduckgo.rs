@@ -6,7 +6,7 @@ use crate::{
     parse::{parse_html_response_with_opts, ParseOpts, QueryMethod},
 };
 
-pub fn request(query: &str) -> RequestResponse {
+pub async fn request(query: &str) -> RequestResponse {
     CLIENT
         .get(
             Url::parse_with_params(

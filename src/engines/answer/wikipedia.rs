@@ -8,7 +8,7 @@ use crate::engines::{EngineResponse, RequestResponse, CLIENT};
 
 use super::colorpicker;
 
-pub fn request(mut query: &str) -> RequestResponse {
+pub async fn request(mut query: &str) -> RequestResponse {
     if !colorpicker::MatchedColorModel::new(query).is_empty() {
         // "color picker" is a wikipedia article but we only want to show the
         // actual color picker answer

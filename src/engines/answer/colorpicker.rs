@@ -4,7 +4,7 @@ use crate::engines::{EngineResponse, SearchQuery};
 
 use super::regex;
 
-pub fn request(query: &SearchQuery) -> EngineResponse {
+pub async fn request(query: &SearchQuery) -> EngineResponse {
     let matched_colors = MatchedColorModel::new(&query.query);
 
     let rgb;

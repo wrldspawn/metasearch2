@@ -12,7 +12,7 @@ use tracing::debug;
 
 use crate::engines::EngineResponse;
 
-pub fn request(query: &str) -> EngineResponse {
+pub async fn request(query: &str) -> EngineResponse {
     let query = clean_query(query);
 
     let Some(NumbatResponse {

@@ -6,7 +6,7 @@ use crate::engines::EngineResponse;
 
 use super::regex;
 
-pub fn request(query: &str) -> EngineResponse {
+pub async fn request(query: &str) -> EngineResponse {
     let query = clean_query(query);
 
     let Some(result_html) = evaluate_to_html(&query, true) else {
